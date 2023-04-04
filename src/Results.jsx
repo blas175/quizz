@@ -2,16 +2,18 @@ import React from "react"
 import "./Results.css"
 import { STATE } from "./constants"
 
-export default function Results({ setAppState, answer, questions, setAnswer }) {
+export default function Results({ setAppState, total, questions, setTotal }) {
   function showResults() {
-    return Object.keys(answer).reduce((acc, a) => {
-      return answer[a].selectedOption.isCorrect ? acc + 1 : acc
-    }, 0)
+    return JSON.stringify(
+      Object.keys(total).reduce((acc, a) => {
+        return total[a] === questions[a].correctAnswer ? acc + 1 : acc
+      }, 0)
+    )
   }
 
   function reset(prams) {
     setAppState(STATE.PLAY)
-    setAnswer({})
+    setTotal({})
   }
   return (
     <div className="quiz-container">

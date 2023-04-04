@@ -3,9 +3,18 @@ import { useState } from "react"
 import "./Play.css"
 import { STATE } from "./constants"
 import AnswerRadio from "./AnswerRadio"
+import useFetch from "./useFetch"
 
-export default function Menu({ setAppState, answer, setAnswer, questions }) {
+export default function Play({ setAppState, total, setTotal }) {
   const [currentQuestion, setCurrentQuestion] = useState(0)
+
+  const {
+    data: questions,
+    loading,
+    error,
+  } = useFetch(
+    "https://the-trivia-api.com/api/questions?limit=5&difficulty=medium"
+  )
 
   function handleNext(e) {
     if (currentQuestion < questions.length - 1) {
@@ -18,10 +27,10 @@ export default function Menu({ setAppState, answer, setAnswer, questions }) {
     }
   }
 
-  function handleAnswer(answerOption) {
-    setAnswer((ans) => ({
+  function handleTotal(answerOption) {
+    setTotal((ans) => ({
       ...ans,
-      [currentQuestion]: { selectedOption: answerOption },
+      [currentQuestion]: answerOption,
     }))
   }
 
@@ -31,8 +40,8 @@ export default function Menu({ setAppState, answer, setAnswer, questions }) {
 
   function showResults() {
     return JSON.stringify(
-      Object.keys(answer).reduce((acc, a) => {
-        return answer[a].selectedOption.isCorrect ? acc + 1 : acc
+      Object.keys(total).reduce((acc, a) => {
+        return total[a] === questions[a].correctAnswer ? acc + 1 : acc
       }, 0)
     )
   }
@@ -48,16 +57,18 @@ export default function Menu({ setAppState, answer, setAnswer, questions }) {
           <div className="question-text">
             <p>
               {`Question ${currentQuestion + 1}: ${
-                questions[currentQuestion].questionText
+                questions ? questions[currentQuestion].question : "Loading..."
               }`}
             </p>
           </div>
-          <AnswerRadio
-            question={questions[currentQuestion]}
-            answer={answer}
-            handleAnswer={handleAnswer}
-            currentQuestion={currentQuestion}
-          />
+          {questions && (
+            <AnswerRadio
+              question={questions[currentQuestion]}
+              total={total}
+              handleTotal={handleTotal}
+              currentQuestion={currentQuestion}
+            />
+          )}
         </div>
         <div className="bottom-bar">
           <button
@@ -68,26 +79,30 @@ export default function Menu({ setAppState, answer, setAnswer, questions }) {
             Previous
           </button>
           <div className="buttons">
-            <button
-              className="submit-button"
-              onClick={handleNext}
-              disabled={currentQuestion === questions.length - 1}
-            >
-              Next
-            </button>
+            {questions && (
+              <button
+                className="submit-button"
+                onClick={handleNext}
+                disabled={currentQuestion === questions.length - 1}
+              >
+                Next
+              </button>
+            )}
           </div>
 
-          <div className="question-counter">
-            Question {currentQuestion + 1}/{questions.length}
-          </div>
+          {questions && (
+            <div className="question-counter">
+              Question {currentQuestion + 1}/{questions.length}
+            </div>
+          )}
         </div>
-        {currentQuestion === questions.length - 1 && (
+        {questions && currentQuestion === questions.length - 1 && (
           <button className="submit-button" onClick={handleResults}>
             See results
           </button>
         )}
-        {showResults()}
       </div>
+      {questions && <p>{showResults()}</p>}
     </div>
   )
 }

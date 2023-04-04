@@ -2,13 +2,15 @@ import React from "react"
 
 export default function AnswerRadio({
   question,
-  answer,
-  handleAnswer,
+  total,
+  handleTotal,
   currentQuestion,
 }) {
+  const answers = [question.correctAnswer, ...question.incorrectAnswers]
+
   return (
     <div>
-      {question.answerOptions.map((answerOption, index) => {
+      {answers.map((answerOption, index) => {
         return (
           <div className="answer-option" key={index}>
             <input
@@ -16,16 +18,15 @@ export default function AnswerRadio({
               id={`option${index}`}
               name="answers"
               checked={
-                answer[currentQuestion] != null &&
-                answer[currentQuestion].selectedOption.answerText ===
-                  answerOption.answerText
+                total[currentQuestion] != null &&
+                total[currentQuestion] === answerOption
               }
-              onChange={(e) => handleAnswer(answerOption)}
-              value={answerOption.answerText}
+              onChange={(e) => handleTotal(answerOption)}
+              value={answerOption}
             />
             <label htmlFor={`option${index}`}>
               <span></span>
-              <span className="answer-text">{answerOption.answerText}</span>
+              <span className="answer-text">{answerOption}</span>
             </label>
           </div>
         )
