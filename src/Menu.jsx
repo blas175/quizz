@@ -7,10 +7,17 @@ export default function Menu({ setAppState }) {
     setAppState(STATE.PLAY)
   }
   return (
-    <div className="menu-container">
-      <button onClick={handleClick}>Play</button>
-      <button>Options</button>
-      <button>Quit</button>
+    <div className="quiz-container">
+      <div className="quiz-header">
+        <h1>Quiz Title</h1>
+      </div>
+      <div className="menu-container">
+        <button className="submit-button" onClick={handleClick}>
+          Play
+        </button>
+        <button className="submit-button">Options</button>
+        <button className="submit-button">Quit</button>
+      </div>
     </div>
   )
 }

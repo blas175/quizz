@@ -2,65 +2,39 @@ import React from "react"
 import { useState } from "react"
 import "./Play.css"
 import { STATE } from "./constants"
+import AnswerRadio from "./AnswerRadio"
 
-export default function Menu({ setAppState }) {
+export default function Menu({ setAppState, answer, setAnswer, questions }) {
   const [currentQuestion, setCurrentQuestion] = useState(0)
 
-  const questions = [
-    {
-      questionText: "What is the capital of France?",
-      answerOptions: [
-        { answerText: "New York", isCorrect: false },
-        { answerText: "London", isCorrect: false },
-        { answerText: "Paris", isCorrect: true },
-        { answerText: "Dublin", isCorrect: false },
-      ],
-    },
-    {
-      questionText: "Who is CEO of Tesla?",
-      answerOptions: [
-        { answerText: "Jeff Bezos", isCorrect: false },
-        { answerText: "Elon Musk", isCorrect: true },
-        { answerText: "Bill Gates", isCorrect: false },
-        { answerText: "Tony Stark", isCorrect: false },
-      ],
-    },
-    {
-      questionText: "The iPhone was created by which company?",
-      answerOptions: [
-        { answerText: "Apple", isCorrect: true },
-        { answerText: "Intel", isCorrect: false },
-        { answerText: "Amazon", isCorrect: false },
-        { answerText: "Microsoft", isCorrect: false },
-      ],
-    },
-    {
-      questionText: "How many Harry Potter books are there?",
-      answerOptions: [
-        { answerText: "1", isCorrect: false },
-        { answerText: "4", isCorrect: false },
-        { answerText: "6", isCorrect: false },
-        { answerText: "7", isCorrect: true },
-      ],
-    },
-  ]
-  const [answers, setAnswers] = useState(Array(questions.length).fill(1))
-
-  function handleAnswer(e) {
-    console.log(parseInt(e.target.value))
-    setAnswers((a) => {
-      a[currentQuestion] = parseInt(e.target.value)
-      return a
-    })
+  function handleNext(e) {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion((v) => v + 1)
+    }
+  }
+  function handlePrevious(e) {
+    if (currentQuestion >= 1) {
+      setCurrentQuestion((v) => v - 1)
+    }
   }
 
-  function handleSubmit(e) {
-    e.preventDefault()
-    console.log(answers)
-    console.log(answers[currentQuestion] === 2)
-    // if (currentQuestion < questions.length - 1) {
-    //   setCurrentQuestion((v) => v + 1)
-    // }
+  function handleAnswer(answerOption) {
+    setAnswer((ans) => ({
+      ...ans,
+      [currentQuestion]: { selectedOption: answerOption },
+    }))
+  }
+
+  function handleResults() {
+    setAppState(STATE.RESULTS)
+  }
+
+  function showResults() {
+    return JSON.stringify(
+      Object.keys(answer).reduce((acc, a) => {
+        return answer[a].selectedOption.isCorrect ? acc + 1 : acc
+      }, 0)
+    )
   }
 
   return (
@@ -73,44 +47,46 @@ export default function Menu({ setAppState }) {
         <div className="question-container">
           <div className="question-text">
             <p>
-              Question {currentQuestion + 1}:{" "}
-              {questions[currentQuestion].questionText}
+              {`Question ${currentQuestion + 1}: ${
+                questions[currentQuestion].questionText
+              }`}
             </p>
           </div>
-          {questions[currentQuestion].answerOptions.map(
-            (answerOption, index) => {
-              return (
-                <div className="answer-option" key={index}>
-                  <input
-                    type="radio"
-                    id={`option${index}`}
-                    name="q1"
-                    onChange={handleAnswer}
-                    value={index}
-                    checked={answers[currentQuestion] === index}
-                  />
-                  <label htmlFor={`option${index}`}>
-                    <span></span>
-                    <span className="answer-text">
-                      {answers[currentQuestion]}
-                      {answerOption.answerText}
-                    </span>
-                  </label>
-                </div>
-              )
-            }
-          )}
+          <AnswerRadio
+            question={questions[currentQuestion]}
+            answer={answer}
+            handleAnswer={handleAnswer}
+            currentQuestion={currentQuestion}
+          />
         </div>
         <div className="bottom-bar">
-          <button className="submit-button" onClick={handleSubmit}>
-            {currentQuestion < questions.length - 1
-              ? "Next question"
-              : "See Results"}
+          <button
+            className="submit-button"
+            onClick={handlePrevious}
+            disabled={currentQuestion === 0}
+          >
+            Previous
           </button>
+          <div className="buttons">
+            <button
+              className="submit-button"
+              onClick={handleNext}
+              disabled={currentQuestion === questions.length - 1}
+            >
+              Next
+            </button>
+          </div>
+
           <div className="question-counter">
             Question {currentQuestion + 1}/{questions.length}
           </div>
         </div>
+        {currentQuestion === questions.length - 1 && (
+          <button className="submit-button" onClick={handleResults}>
+            See results
+          </button>
+        )}
+        {showResults()}
       </div>
     </div>
   )
